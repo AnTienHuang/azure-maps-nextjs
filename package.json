@@ -29,7 +29,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-material-ui": "^0.0.1",
-    "react-syntax-highlighter": "^15.5.0"
+    "react-syntax-highlighter": "^15.5.0",
+    "postcss": "^8"
   },
   "devDependencies": {
     "@babel/core": "^7.23.6",
