@@ -1,0 +1,26 @@
+services:
+  app:
+    build:
+      context: . # Directory where Next.js app Dockerfile is located
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - 3000:3000 
+    volumes:
+      - ./:/app # Map entire project directory
+      - /app/node_modules # create anon volume and only use this intra-container node modules
+    command: sh -c "npm run dev"
+    restart: always
+
+    develop:
+      watch:
+        - path: ./package.json
+          action: rebuild
+        - path: ./next.config.js
+          action: rebuild
+        - path: ./package-lock.json
+          action: rebuild
+        - path: .
+          target: /app
+          action: sync
