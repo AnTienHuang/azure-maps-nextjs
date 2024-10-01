@@ -280,27 +280,25 @@ const MapPage: React.FC<MapProps> = ({ Locations }) => {
             map.popups.clear();
           }
                     
-          const listItemHover = (id: string | undefined) => {
-            if (!id) return;
-            const shapeId = hotelIdToShapeIdMap.get(id);
-            if (!shapeId) return;
-            const shape = datasource.getShapeById(shapeId);
-            if (!shape) return;
-            showPopup(shape);
+          const listItemHover = (id?: string) => {
+            const shapeId = id && hotelIdToShapeIdMap.get(id);
+            const shape = shapeId && datasource.getShapeById(shapeId); 
+            if (shape) {
+              showPopup(shape);
+            }
           };
 
-          const listItemClick = (id: string | undefined) => {
-            if (!id) return;
-            const shapeId = hotelIdToShapeIdMap.get(id);
-            if (!shapeId) return;
-            const shape = datasource.getShapeById(shapeId);
-            if (!shape) return; 
-            map.setCamera({
-              center: shape.getCoordinates(),
-              zoom: 15
-            }); 
-            shapeClick(shape);
-          }
+          const listItemClick = (id?: string) => {
+            const shapeId = id && hotelIdToShapeIdMap.get(id);
+            const shape = shapeId && datasource.getShapeById(shapeId);
+            if (shape) {
+                map.setCamera({
+                    center: shape.getCoordinates(),
+                    zoom: 15
+                });
+                shapeClick(shape);
+            }
+          };
 
           map.events.add('click', symbolLayer, mapClickHandler);
           map.events.add('mousemove', symbolLayer, highlightListItem);
