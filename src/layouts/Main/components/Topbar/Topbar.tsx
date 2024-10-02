@@ -24,6 +24,9 @@ const Topbar = (): JSX.Element => {
 
       <Box sx={{ display: { xs: "none", md: "flex" } }} alignItems={"center"}>
         <Box mr={'32px'}>
+          <Link href="/Map">Plain Map</Link>
+        </Box>
+        <Box mr={'32px'}>
           <Link href="/MapWithList">Map With List</Link>
         </Box>
         <Box mr={'32px'}>
