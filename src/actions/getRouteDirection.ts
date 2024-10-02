@@ -10,24 +10,24 @@ export async function getRouteDirection(data: string): Promise<RouteDirectionsOu
   if (!process.env.AZURE_MAPS_SUBSCRIPTION_KEY) {
     throw new Error("AZURE_MAPS_SUBSCRIPTION_KEY is not defined");
   }
-
   const credential = new AzureKeyCredential(process.env.AZURE_MAPS_SUBSCRIPTION_KEY);
   const client = MapsRoute(credential);
+
   // Decode the input data
   const prop: RouteDirectionsProps = JSON.parse(data);
   const { origin, destination, waypoints } = prop;
-  // console.log('prop', prop);
   if (!origin || !destination) {
     return {summary: null, legs: null, sections: null};
   }
-  
+
+  // Prepare request body
   const queryPoints: LatLon[] = [origin];
   if (waypoints && waypoints.length > 0) {
     queryPoints.push(...waypoints);
   }
-  
   queryPoints.push(destination);
-  // console.log(queryPoints);
+
+  // Send request
   const routeDirectionsResult = await client.path("/route/directions/{format}", "json").get({
     queryParameters: {
       query: toColonDelimitedLatLonString(queryPoints),

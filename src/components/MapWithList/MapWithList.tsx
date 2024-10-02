@@ -17,7 +17,7 @@ const MapPage: React.FC<MapProps> = ({ Locations }) => {
   const [hotelIdToShapeIdMap, setHotelIdToShapeIdMap] = useState<Map<string, string>>(new Map());
   const [map, setMap] = useState<atlas.Map | null>(null);
    // Apply MS map
-   useEffect(() => {
+  useEffect(() => {
     // Create a link element
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -30,7 +30,6 @@ const MapPage: React.FC<MapProps> = ({ Locations }) => {
     let map: atlas.Map;
     let datasource: atlas.source.DataSource;
     let popup: atlas.Popup;
-    // if (!mapRef.current) return;
     // Initialise new map
     const initializeMap = () => {
       map = new atlas.Map(mapRef.current!, {
