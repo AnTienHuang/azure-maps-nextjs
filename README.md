@@ -1,36 +1,21 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is a sample Next.js project for an Azure Maps [tutorial](https://medium.com/@antien.huang/azure-maps-tutorial-with-nextjs-99f395f07a19?source=friends_link&sk=c3a20619f76e12fb7c55c76f97e2618f).
 
-## Getting Started
+## Setup
+- Add your own .env file based on the .env-template.
 
-First, run the development server:
+- To use the "Plain Map" tab (http://localhost:3000/Map), update the Azure Maps subscription key in `/src/components/Map.tsx`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Run with Docker
+1. Run `sh docker-up` or `docker compose up` in terminal.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+No need to restart the container to see the changes you made, it is configured to refresh automatically.
+
+In case of unexpected error for Azure Maps rendering, hard refresh your browser or reset your container with `sh docker-reset`.
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Contact me via [LinkedIn](https://www.linkedin.com/in/an-tien-huang/) or [email](mailto:antien.huang@gmail.com)
+- [My Detailed tutorial for Azure Maps](https://medium.com/@antien.huang/azure-maps-tutorial-with-nextjs-99f395f07a19?source=friends_link&sk=c3a20619f76e12fb7c55c76f97e2618f)
