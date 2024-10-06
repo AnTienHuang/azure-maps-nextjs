@@ -29,7 +29,7 @@ const MapPage: React.FC<MapProps> = ({ Locations }) => {
   useEffect(() => {
     let map: atlas.Map;
     let datasource: atlas.source.DataSource;
-    let popup: atlas.Popup;
+    const popup = new atlas.Popup();
     // Initialise new map
     const initializeMap = () => {
       map = new atlas.Map(mapRef.current!, {
@@ -79,7 +79,6 @@ const MapPage: React.FC<MapProps> = ({ Locations }) => {
           map.imageSprite.add('hotel_red_icon', '/map_icons/hotel_red.png'),
         ];
         Promise.all(iconPromises).then(function () {
-          const popup = new atlas.Popup();
           // Add hotel layer
           const symbolLayer = new atlas.layer.SymbolLayer(datasource, 'symbolLayer', {
             iconOptions: { 
@@ -90,12 +89,12 @@ const MapPage: React.FC<MapProps> = ({ Locations }) => {
                 'tube', 'underground_icon',
                 'hotel', 'hotel_red_icon',
                 'hotel_red_icon' //Default icon
-            ],
+              ],
               allowOverlap: false,
               size: 0.1
             },
             textOptions: {
-              textField: ['get', 'title'],
+              textField: ['get', 'name'],
               font: ['SegoeUi-SemiBold'],
               size: 28,
               color: '#03088f',
@@ -154,10 +153,10 @@ const MapPage: React.FC<MapProps> = ({ Locations }) => {
               getNearbyTubes(position).then((tubes) => {
                 const tubePoints = tubes.map((tube: MapLocation) => 
                   new atlas.data.Feature(new atlas.data.Point([tube.longitude, tube.latitude]), {
-                    title: tube.name || '',
+                    name: tube.name || '',
                     type: 'tube',
                     popupTemplate: {
-                      content: [[{ propertyPath: 'title', label: ' ' }]]
+                      content: [[{ propertyPath: 'name', label: ' ' }]]
                     }
                   })
                 );
@@ -181,7 +180,7 @@ const MapPage: React.FC<MapProps> = ({ Locations }) => {
                     }
                   }
                   // Update the route on the map
-                  datasource.remove('routeLine')
+                  datasource.remove('routeLine') // remove the previous route
                   datasource.add(new atlas.data.Feature(new atlas.data.LineString(newRouteCoords.map(coord => [coord[1], coord[0]])), {
                     strokeColor: '#007cbf',
                     strokeWidth: 5
@@ -222,26 +221,25 @@ const MapPage: React.FC<MapProps> = ({ Locations }) => {
             handleShapeClick(e as atlas.MapMouseEvent);
           };
 
-          // Set hotel list
-          const setHotelListHTML = (properties: MapLocation[]) => {
-            popup.close();
+          // Set hotel cards
+          const setHotelListHTML = (locations: MapLocation[]) => {
             const pageInfo = document.getElementById('pageInfo');
             if (!pageInfo) return;
-            pageInfo.innerText = `Results: ${properties.length} hotels`;
+            pageInfo.innerText = `Results: ${locations.length} hotels`;
             const listHTML: JSX.Element[] = [
               <div key="resultsContainer" className={styles.cardContainer}>
-                {properties.map((property) => (
+                {locations.map((location) => (
                   <div 
-                    key={property.name}
+                    key={location.name}
                     className={styles.card}
-                    onClick={() => listItemClick(property.name)}
+                    onClick={() => listItemClick(location.name)}
                     onMouseLeave={() => closePopups()}
                   >
                     <h3 
                       className={styles.cardTitle}
-                      onMouseOver={() => listItemHover(property.name)}
+                      onMouseOver={() => listItemHover(location.name)}
                     >
-                      {property.name}
+                      {location.name}
                     </h3>
                     <button
                       className={styles.cardButton}
@@ -305,7 +303,6 @@ const MapPage: React.FC<MapProps> = ({ Locations }) => {
             map.getCanvasContainer().style.cursor = 'grab';
           });
           setMap(map);
-          LimitScrollWheelZoom(map); // Remove if not needed
         });
       });
     };
@@ -331,63 +328,6 @@ const MapPage: React.FC<MapProps> = ({ Locations }) => {
       })
     }
   };
-
-  function LimitScrollWheelZoom(map: atlas.Map): void {
-    map.setUserInteraction({ scrollZoomInteraction: false });
-
-    // Create a message dialog to tell the user how to zoom the map if they use the scroll wheel on the map without CTRL.
-    const msgDialog = document.createElement('div');
-    Object.assign(msgDialog.style, {
-        display: 'none',
-        position: 'absolute',
-        top: '0',
-        left: '0',
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        color: 'white',
-        fontSize: '24px',
-        fontWeight: 'bold',
-        transition: 'visibility 0s linear 0s, opacity 1000ms'
-    });
-    msgDialog.innerHTML = `
-    <div style="position:relative;float:left;top:50%;left:50%;transform:translate(-50%,-50%);">
-      <p> Use ctrl + scroll to zoom the map </p>
-      <br>
-      <p> or Use +/- buttons </p>
-    </div>`;
-    map.getMapContainer().appendChild(msgDialog);
-
-    // Show the message dialog for 2 seconds then fade out over 300ms.
-    const showMsgDialog = (): void => {
-        msgDialog.style.display = '';
-        msgDialog.style.opacity = '1';
-        setTimeout(() => {
-            msgDialog.style.opacity = '0';
-            setTimeout(() => {
-                msgDialog.style.display = 'none';
-            }, 300);
-        }, 2000);
-    };
-
-    map.getMapContainer().addEventListener('wheel', (e: WheelEvent) => {
-        if (!e.ctrlKey) {
-            showMsgDialog();
-        }
-    });
-
-    window.addEventListener('keydown', (e: KeyboardEvent) => {
-        if (e.ctrlKey) {
-            map.setUserInteraction({ scrollZoomInteraction: true });
-        }
-    });
-
-    window.addEventListener('keyup', (e: KeyboardEvent) => {
-        if (!e.ctrlKey) {
-            map.setUserInteraction({ scrollZoomInteraction: false });
-        }
-    });
-  }
   
   return (
     <>
@@ -423,7 +363,7 @@ const MapPage: React.FC<MapProps> = ({ Locations }) => {
         }
         .controlContainer {
           position: absolute;
-          bottom: 10px;
+          bottom: 100px;
           right: 10px;
           display: flex;
           flex-direction: column;

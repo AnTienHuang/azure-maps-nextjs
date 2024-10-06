@@ -17,6 +17,7 @@ interface MapRouteCompProps {
 }
 const MapRouteComp: React.FC<MapRouteCompProps> = ({ Locations }) => {
   const mapRef = useRef<HTMLDivElement>(null);
+  const [map, setMap] = useState<atlas.Map | null>(null);
   const [routeCoords, setRouteCoords] = useState<LatLon[]>([]);
   const [routePoints, setRoutPoints] = useState<RoutePoint[]>([]);
 
@@ -127,7 +128,7 @@ const MapRouteComp: React.FC<MapRouteCompProps> = ({ Locations }) => {
             allowOverlap: true
           },
           textOptions: {
-            textField: ['get', 'title'],
+            textField: ['get', 'name'],
             offset: [0, 1.2],
             color: 'black',
             haloColor: 'white',
@@ -141,7 +142,7 @@ const MapRouteComp: React.FC<MapRouteCompProps> = ({ Locations }) => {
         // Create the GeoJSON objects from the locations
         const points = Locations.map((location: MapLocation) => 
           new atlas.data.Feature(new atlas.data.Point([Number(location.longitude), Number(location.latitude)]), {
-            title: location.name || '',
+            name: location.name || '',
             type: 'hotel',
             icon: 'pin-red',
           })
@@ -235,6 +236,8 @@ const MapRouteComp: React.FC<MapRouteCompProps> = ({ Locations }) => {
             console.log('No shape clicked')
           }
         });
+        setMap(map);
+        LimitScrollWheelZoom(map);
       });
     };
 
@@ -249,8 +252,124 @@ const MapRouteComp: React.FC<MapRouteCompProps> = ({ Locations }) => {
     };
   }, [Locations, routeCoords]);
 
+  const zoomMap = (offset: number) => (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (map) {
+      var cam = map.getCamera();
+      map.setCamera({
+        //Zoom the map within the range of min/max zoom of the map.
+        zoom: Math.max(cam.minZoom!, Math.min(cam.maxZoom!, cam.zoom! + offset)),
+        type: 'ease',
+        duration: 250
+      })
+    }
+  };
+
+  function LimitScrollWheelZoom(map: atlas.Map): void {
+    map.setUserInteraction({ scrollZoomInteraction: false });
+
+    // Create a message dialog to tell the user how to zoom the map if they use the scroll wheel on the map without CTRL.
+    const msgDialog = document.createElement('div');
+    Object.assign(msgDialog.style, {
+        display: 'none',
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        color: 'white',
+        fontSize: '24px',
+        fontWeight: 'bold',
+        transition: 'visibility 0s linear 0s, opacity 1000ms'
+    });
+    msgDialog.innerHTML = `
+    <div style="position:relative;float:left;top:50%;left:50%;transform:translate(-50%,-50%);">
+      <p> Use ctrl + scroll to zoom the map </p>
+      <br>
+      <p> or Use +/- buttons </p>
+    </div>`;
+    map.getMapContainer().appendChild(msgDialog);
+
+    // Show the message dialog for 2 seconds then fade out over 300ms.
+    const showMsgDialog = (): void => {
+        msgDialog.style.display = '';
+        msgDialog.style.opacity = '1';
+        setTimeout(() => {
+            msgDialog.style.opacity = '0';
+            setTimeout(() => {
+                msgDialog.style.display = 'none';
+            }, 300);
+        }, 700);
+    };
+
+    map.getMapContainer().addEventListener('wheel', (e: WheelEvent) => {
+        if (!e.ctrlKey) {
+            showMsgDialog();
+        }
+    });
+
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.ctrlKey) {
+            map.setUserInteraction({ scrollZoomInteraction: true });
+        }
+    });
+
+    window.addEventListener('keyup', (e: KeyboardEvent) => {
+        if (!e.ctrlKey) {
+            map.setUserInteraction({ scrollZoomInteraction: false });
+        }
+    });
+  } 
+
   return (
-    <div ref={mapRef} style={{ width: '100%', height: '100vh' }} />
+    <>
+      <div className="mapContainer">
+        <div id="myMap" ref={mapRef}></div>
+        <div className="controlContainer">
+          <button className="navButton" onClick={zoomMap(1)} title="Zoom In">+</button>
+          <button className="navButton" onClick={zoomMap(-1)} title="Zoom Out">-</button>
+        </div>
+      </div>
+      <style jsx>{`
+        .mapContainer {
+          position: relative;
+          flex-grow: 1;
+          height: 90vh;
+        }
+        #myMap {
+          width: 100%;
+          height: 100%;
+        }
+        .controlContainer {
+          position: absolute;
+          bottom: 100px;
+          right: 10px;
+          display: flex;
+          flex-direction: column;
+        }
+        .controlContainer .navButton {
+          margin: 2px 0;
+          background-color: #fff;
+          box-shadow: rgb(0 0 0 / 16%) 0 0 4px;
+          border: none;
+          border-radius: 2px;
+          width: 40px;
+          height: 40px;
+          padding: 2px 8px;
+          color: black;
+          font-size: 24px;
+          font-weight: bold;
+          text-align: center;
+          text-decoration: none;
+          line-height: 24px;
+          display: inline-block;
+          cursor: pointer;
+        }
+        .controlContainer .navButton:hover {
+          color: deepskyblue;
+        }
+      `}</style>
+    </>
   );
 };
 
